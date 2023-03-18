@@ -1,8 +1,8 @@
-from flask import render_template, url_for, flash, redirect
+from flask import render_template, url_for, flash, redirect, request
 from saleWA.forms import RegistrationForm, LoginForm
 from saleWA.models import Users, Post
 from saleWA import app, db, bcrypt
-from flask_login import login_user, current_user, logout_user
+from flask_login import login_user, current_user, logout_user, login_required
 
 clothes = [
     {
@@ -56,7 +56,8 @@ def login():
         user = Users.query.filter_by(email=form.email.data).first() #check to see if there is a user with this email in the database, if so grab it, if not this will be none
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
-            return redirect(url_for('home'))
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('home')) #redirect to the next page if it exists, else just go to home page
         else:
             flash('Login unsuccessful. Please check email and password', 'danger')
             
@@ -67,3 +68,9 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route('/account')
+@login_required
+def account():
+    return render_template('account.html', title='Account')

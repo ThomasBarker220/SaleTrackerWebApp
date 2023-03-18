@@ -10,6 +10,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app) #when working w db in terminal appctx = app.app_context(), appctx.push(), appctx.pop()
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
+login_manager.login_view = 'login' #require login for account page
+login_manager.login_message_category = 'info' #change display of login message to bootstrap class
 
 
 from saleWA import routes #has to be down here so there aren't circular imports
