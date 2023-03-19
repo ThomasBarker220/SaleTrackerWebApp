@@ -1,5 +1,5 @@
 from flask import render_template, url_for, flash, redirect, request
-from saleWA.forms import RegistrationForm, LoginForm
+from saleWA.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from saleWA.models import Users, Post
 from saleWA import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -70,7 +70,19 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/account')
+@app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    return render_template('account.html', title='Account')
+    form = UpdateAccountForm()
+    if form.validate_on_submit(): #if form is valid
+        current_user.username = form.username.data
+        current_user.email  = form.email.data
+        db.session.commit()
+        flash('Your account information has been updated!', 'success') #success is the bootstrap class, flash a message if info is updated
+        return redirect(url_for('account')) #redirect so you don't get another post request
+    elif request.method == 'GET': #automatically populate form with current users data
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file) #use the image file stored in the database with this user
+    return render_template('account.html', title='Account', 
+                           image_file=image_file, form=form)
