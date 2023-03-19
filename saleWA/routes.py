@@ -1,3 +1,6 @@
+import os
+import secrets
+from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
 from saleWA.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from saleWA.models import Users, Post
@@ -70,11 +73,32 @@ def logout():
     return redirect(url_for('home'))
 
 
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8) #get a random hex for the photo name so it doesn't clash with existing file names
+    _, f_ext = os.path.splitext(form_picture.filename) #the file has filename attribute, using _ because we don't need the first variable
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn) #create a variable equal to the full path of the new profile picture
+    
+    output_size = (125, 125) #set desired size
+    i = Image.open(form_picture)
+    i.thumbnail(output_size) #resize image before uploading
+
+    i.save(picture_path)
+    prev_picture = os.path.join(app.root_path, 'static/profile_pics', current_user.image_file) #check for previous picture
+    if os.path.exists(prev_picture) and os.path.basename(prev_picture) != 'default.jpg': #remove previous picture if it is not the default picture
+        os.remove(prev_picture)
+
+    return picture_fn
+
+
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit(): #if form is valid
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
         current_user.username = form.username.data
         current_user.email  = form.email.data
         db.session.commit()
