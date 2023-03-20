@@ -2,7 +2,7 @@ import os
 import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
-from saleWA.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from saleWA.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from saleWA.models import Users, Post
 from saleWA import app, db, bcrypt
 from flask_login import login_user, current_user, logout_user, login_required
@@ -30,7 +30,8 @@ def home():
 
 @app.route('/items')
 def items():
-    return render_template('items.html', clothes=clothes, title='Items Page')
+    posts = Post.query.all()
+    return render_template('items.html', posts=posts, title='Items Page')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -110,3 +111,21 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file) #use the image file stored in the database with this user
     return render_template('account.html', title='Account', 
                            image_file=image_file, form=form)
+
+
+@app.route('/post/new', methods=['GET','POST']) #This will need to be changed
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', title='New Post', form=form)
+
+@app.route('/post/<int:post_id>')
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title, post=post)

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from saleWA.models import Users
 
@@ -54,3 +54,9 @@ class UpdateAccountForm(FlaskForm): #want users to be able to update their usern
             user = Users.query.filter_by(email=email.data).first() 
             if user:
                 raise ValidationError('That email is already in use. Please use a different one.')
+            
+
+class PostForm(FlaskForm): #This needs to be changed
+    title = StringField('Title', validators=[DataRequired()]) #maybe change this to new url
+    content  = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post')
