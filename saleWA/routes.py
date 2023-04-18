@@ -30,7 +30,8 @@ def home():
 
 @app.route('/items')
 def items(): #need to make sure these only display for the currently logged in user
-    posts = Post.query.all()
+    page = request.args.get('page', 1, type=int) #get the page number from the url, if it doesn't exist, default to 1
+    posts = Post.query.paginate(per_page=5)
     return render_template('items.html', posts=posts, title='Items Page')
 
 
@@ -122,7 +123,7 @@ def new_post():
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('items'))
     return render_template('create_post.html', title='New Post', form=form,
                            legend='New Post')
 
