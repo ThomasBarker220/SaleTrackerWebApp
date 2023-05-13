@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from PIL import Image
 import re
 
@@ -30,6 +31,8 @@ def check_sales(links):
         window_height = driver.execute_script(
             'return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );')
         driver.set_window_size(1920, window_height / 3)
+        driver.implicitly_wait(10)
+        webdriver.ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         driver.implicitly_wait(10)
 
         item_name = driver.find_element(By.CSS_SELECTOR, 'h1')
@@ -63,8 +66,6 @@ urls = ["https://bearbottomclothing.com/collections/shorts/products/loft"
         "-sweater-51918825?seq=03&categoryId=86655&faceout=model",
         "https://www.patagonia.com/product/mens-long-sleeved-cotton-in"
         "-conversion-lightweight-fjord-flannel-shirt/42410.html?dwvar_42410_color=BETB&cgid=web-specials-mens",
-        "https://unitedbyblue.com/products/mens-indigo-throwback"
-        "-sweatshirt",
         "https://bananarepublicfactory.gapfactory.com/browse/product.do"
         "?pid=580739001&cid=1045334&pcid=1045334&vid=1&nav=meganav%3AMen%3AMen%27s+Clothing%3ASweaters&cpos=18&cexp=368&kcid=CategoryIDs%3D1045334&cvar=2363&ctype=Listing&cpid=res23021722208407532520781#pdp-page-content"]
 
